@@ -1,6 +1,8 @@
 import express from 'express';
 import path from 'path';
 import {fileURLToPath} from 'url';
+import {deleteItem, getItemById, getItems, postItem, putItem} from './items.mjs';
+import {getUserById, getUsers, postUser, postLogin, putUser} from './users.mjs';
 const hostname = '127.0.0.1';
 const port = 3000;
 const app = express();
@@ -13,40 +15,34 @@ const __dirname = path.dirname(__filename);
 // Tarjoiltava kansio määritellään relatiivisella polulla
 app.use('/sivusto', express.static(path.join(__dirname, '../public')));
 
-// mock data for simple API
-const items = [
-  {id: 1, name: 'Item 1'},
-  {id: 2, name: 'Item 2'},
-  {id: 3, name: 'Item kolme'},
-  {id: 4, name: 'Item neljä'},
-];
-
+// RESOURCE /item endpoints
 // GET http://127.0.0.1:3000/items
-app.get('/items', (req, res) => {
-  res.json(items);
-});
+app.get('/items', getItems);
 
 // GET http://127.0.0.1:3000/items/<ID>
-app.get('/items/:id', (req, res) => {
-  // Etsi objekti, jonka id vastaa pyydettyä
-  const requestedId = parseInt(req.params.id);
-  const item = items.find((item) => item.id === requestedId);
-
-  if (!item) {
-    // Jos objektia ei löydy, palauta virhekoodi 404 Not Found
-    return res.status(404).json({message: 'Item not found'});
-  }
-
-  // Palauta löydetty objekti
-  res.json(item);
-});
+app.get('/items/:id', getItemById);
 
 // Itemin lisäys
 // POST http://127.0.0.1:3000/items/
-app.post('/items', (req, res) => {
-  // TODO (vapaaehtonen, jatketaan tästä ens kerralla): lisää postattu item items-taulukkoon
-  res.json({message: 'item created'});
-});
+app.post('/items', postItem);
+
+//PUT
+app.put('/items/:id', putItem);
+
+//DELETE
+app.delete('/item/:id', deleteItem);
+
+// Users resource
+// list users
+app.get('/users', getUsers);
+// get info of a user
+app.get('/users/:id', getUserById);
+// user registration
+app.post('/users', postUser);
+// user login
+app.post('/users/login', postLogin);
+// update user
+app.put('/users/:id', putUser);
 
 // GET http://127.0.0.1:3000
 // ei toimi tällä hetkellä, koska public-server tarjoilee index.html:n ensin
