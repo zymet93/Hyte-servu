@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS HealthDiary;
-CREATE DATABASE HealthDiary;
-USE HealthDiary;
+DROP DATABASE IF EXISTS healthdiary;
+CREATE DATABASE healthdiary;
+USE healthdiary;
 
 -- Create a table for users
 CREATE TABLE Users (

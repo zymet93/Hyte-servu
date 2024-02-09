@@ -1,8 +1,8 @@
 -- Drop the database if it exists and then create it
-DROP DATABASE IF EXISTS HealthDiary;
-CREATE DATABASE HealthDiary;
+DROP DATABASE IF EXISTS healthdiary;
+CREATE DATABASE healthdiary;
 
-USE HealthDiary;
+USE healthdiary;
 
 CREATE TABLE Users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
