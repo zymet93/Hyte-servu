@@ -1,34 +1,25 @@
-import express from 'express';
+import Express from 'express';
 import {
   getUserById,
   getUsers,
   postUser,
-  postLogin,
   putUser,
   deleteUser,
 } from '../controllers/user-controller.mjs';
+import {authenticateToken} from '../middlewares/authentication.mjs';
 
-const userRouter = express.Router();
+const userRouter = Express.Router();
 
-// /user endpoint
-userRouter
-  .route('/')
-  // list users
-  .get(getUsers)
-  // user registration
-  .post(postUser);
+// list users
+userRouter.get('/', authenticateToken, getUsers);
+// update user
+userRouter.put('/', authenticateToken, putUser);
+// user registration
+userRouter.post('/', postUser);
 
-// /user/:id endpoint
-userRouter
-  .route('/:id')
-  // get info of a user
-  .get(getUserById)
-  // update user
-  .put(putUser)
-  // delete user based on id
-  .delete(deleteUser);
+// get info of a user
+userRouter.get('/:id', authenticateToken, getUserById);
 
-// user login
-userRouter.post('/login', postLogin);
+userRouter.delete('/:id', authenticateToken, deleteUser);
 
 export default userRouter;

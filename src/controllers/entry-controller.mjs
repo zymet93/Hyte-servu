@@ -42,14 +42,30 @@ const postEntry = async (req, res) => {
 };
 
 const putEntry = async (req, res) => {
+  const currentUser = req.user; // Assuming authenticateToken middleware attaches user to req.user
+
   const entry_id = req.params.id;
   const {user_id, entry_date, mood, weight, sleep_hours, notes} = req.body;
+
   if (
     entry_id &&
     user_id &&
     entry_date &&
     (mood || weight || sleep_hours || notes)
   ) {
+    const entry = await findEntryById(entry_id);
+
+    if (!entry) {
+      res.status(404).json({error: 'Entry not found'});
+      return;
+    }
+
+    // Check if the current user is the owner of the entry
+    if (entry.user_id !== currentUser.id) {
+      res.status(403).json({error: 'Forbidden'});
+      return;
+    }
+
     const result = await updateEntry({entry_id, ...req.body});
     if (!result.error) {
       res.sendStatus(200);
@@ -62,7 +78,23 @@ const putEntry = async (req, res) => {
 };
 
 const deleteEntry = async (req, res) => {
-  const result = await deleteEntryById(req.params.id);
+  const currentUser = req.user; // Assuming authenticateToken middleware attaches user to req.user
+
+  const entry_id = req.params.id;
+  const entry = await findEntryById(entry_id);
+
+  if (!entry) {
+    res.status(404).json({error: 'Entry not found'});
+    return;
+  }
+
+  // Check if the current user is the owner of the entry
+  if (entry.user_id !== currentUser.id) {
+    res.status(403).json({error: 'Forbidden'});
+    return;
+  }
+
+  const result = await deleteEntryById(entry_id);
   if (!result.error) {
     res.sendStatus(200);
   } else {
