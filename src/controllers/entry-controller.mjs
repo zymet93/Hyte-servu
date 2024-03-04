@@ -1,3 +1,4 @@
+import {validationResult} from 'express-validator';
 import {
   listAllEntries,
   findEntryById,
@@ -25,21 +26,31 @@ const getEntryById = async (req, res) => {
   }
 };
 
-const postEntry = async (req, res) => {
-  const {user_id, entry_date, mood, weight, sleep_hours, notes} = req.body;
-  if (entry_date && (weight || mood || sleep_hours || notes) && user_id) {
-    const result = await addEntry(req.body);
-    if (result.entry_id) {
-      res.status(201);
-      res.json({message: 'New entry added.', ...result});
+const postEntry = async (req, res, next) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const { user_id, entry_date, mood, weight, sleep_hours, notes } = req.body;
+    if (entry_date && (weight || mood || sleep_hours || notes) && user_id) {
+      const result = await addEntry(req.body);
+      if (result.entry_id) {
+        res.status(201);
+        res.json({ message: 'New entry added.', ...result });
+      } else {
+        throw new Error('Failed to add entry');
+      }
     } else {
-      res.status(500);
-      res.json(result);
+      res.sendStatus(400);
     }
-  } else {
-    res.sendStatus(400);
+  } catch (error) {
+    next(error); // Forward the error to the error handler middleware
   }
 };
+
 
 const putEntry = async (req, res) => {
   const currentUser = req.user; // Assuming authenticateToken middleware attaches user to req.user

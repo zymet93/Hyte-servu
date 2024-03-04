@@ -8,6 +8,7 @@ import entryRouter from './routes/entry-router.mjs';
 import cors from 'cors';
 import logger from './middlewares/logger.mjs';
 import authRouter from './routes/auth-router.mjs';
+import {errorHandler, notFoundHandler} from './middlewares/error-handler.mjs';
 const hostname = '127.0.0.1';
 const port = 3000;
 const app = express();
@@ -33,6 +34,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use('/sivusto', express.static(path.join(__dirname, '../public')));
 
+
+
 // Test RESOURCE /items endpoints (just mock data for testing, not connected to any database)
 app.use('/items', itemRouter);
 
@@ -44,6 +47,11 @@ app.use('/api/users', userRouter);
 
 // User authentication
 app.use('/api/auth', authRouter);
+
+// Default 404 not found
+app.use(notFoundHandler);
+// Error handler for sending response all error cases
+app.use(errorHandler);
 
 // Start the server
 app.listen(port, hostname, () => {

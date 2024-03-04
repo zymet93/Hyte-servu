@@ -52,7 +52,7 @@ const addEntry = async (entry) => {
     return {entry_id: rows[0].insertId};
   } catch (e) {
     console.error('error', e.message);
-    return {error: e.message};
+    return next(new Error(e));
   }
 };
 
