@@ -1,28 +1,30 @@
 import {validationResult} from 'express-validator';
 import {
-  listAllEntries,
+  listAllEntriesByUserId,
   findEntryById,
   addEntry,
   updateEntry,
   deleteEntryById,
 } from '../models/entry-model.mjs';
 
-const getEntries = async (req, res) => {
-  const result = await listAllEntries();
+const getEntries = async (req, res, next) => {
+  // return only logged in user's own entries
+  // - get user's id from token (req.user.user_id)
+  const result = await listAllEntriesByUserId(req.user.user_id);
   if (!result.error) {
     res.json(result);
   } else {
-    res.status(500);
-    res.json(result);
+    next(new Error(result.error));
   }
 };
 
-const getEntryById = async (req, res) => {
-  const entry = await findEntryById(req.params.id);
+
+const getEntryById = async (req, res, next) => {
+  const entry = await findEntryById(req.params.id, req.user.user_id);
   if (entry) {
     res.json(entry);
   } else {
-    res.sendStatus(404);
+    next(customError('Entry not found', 404));
   }
 };
 
@@ -88,29 +90,13 @@ const putEntry = async (req, res) => {
   }
 };
 
-const deleteEntry = async (req, res) => {
-  const currentUser = req.user; // Assuming authenticateToken middleware attaches user to req.user
-
-  const entry_id = req.params.id;
-  const entry = await findEntryById(entry_id);
-
-  if (!entry) {
-    res.status(404).json({error: 'Entry not found'});
-    return;
+const deleteEntry = async (req, res, next) => {
+  const result = await deleteEntryById(req.params.id, req.user.user_id);
+  if (result.error) {
+    return next(customError(result.message, result.error));
   }
-
-  // Check if the current user is the owner of the entry
-  if (entry.user_id !== currentUser.id) {
-    res.status(403).json({error: 'Forbidden'});
-    return;
-  }
-
-  const result = await deleteEntryById(entry_id);
-  if (!result.error) {
-    res.sendStatus(200);
-  } else {
-    res.status(500).json(result);
-  }
+  return res.json(result);
 };
+
 
 export {getEntries, getEntryById, postEntry, putEntry, deleteEntry};

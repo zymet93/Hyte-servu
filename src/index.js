@@ -15,13 +15,15 @@ const app = express();
 
 // middleware, joka lisää CORS-otsakkeen jokaiseen lähtevään vastaukseen.
 // Eli kerrotaan selaimelle, että tämä palvelin sallii AJAX-pyynnöt
-// myös muista kuin samasta alkuperästä (url-osoitteesta, palvelimelta) ladatuilta sivuilta.
+// myös muista kuin samasta alkuperästä (url-osoitteesta, palvelimelta)
+// ladatuilta sivuilta.
 app.use(cors());
 
 // logger middleware
 app.use(logger);
 
-// middleware, joka parsii pyynnössä olevan JSON-datan ja lisää sen request-objektiin (req.body)
+// middleware, joka parsii pyynnössä olevan JSON-datan
+// ja lisää sen request-objektiin (req.body)
 app.use(express.json());
 
 // Staattinen sivusto palvelimen juureen (public-kansion sisältö näkyy osoitteessa http://127.0.0.1:3000/sivu.html)
@@ -29,14 +31,13 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Staattinen sivusto voidaan tarjoilla myös "ali-url-osoitteessa": http://127.0.0.1:3000/sivusto
-// Tarjoiltava kansio määritellään relatiivisella polulla (tässä käytössä sama kansio kuin yllä).
+// Tarjoiltava kansio määritellään relatiivisella polulla
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use('/sivusto', express.static(path.join(__dirname, '../public')));
+app.use('/docs', express.static(path.join(__dirname, '../docs')));
 
-
-
-// Test RESOURCE /items endpoints (just mock data for testing, not connected to any database)
+// Test RESOURCE /items endpoints
+// (just mock data for testing, not connected to any database)
 app.use('/items', itemRouter);
 
 // bind base url (/api/entries resource) for all entry routes to entryRouter
